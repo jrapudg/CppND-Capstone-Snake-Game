@@ -1,13 +1,13 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <vector>
 #include "SDL.h"
 #include "snake.h"
 #include <memory>
+#include <vector>
 
 class Renderer {
- public:
+public:
   Renderer(const std::size_t screen_width, const std::size_t screen_height,
            const std::size_t grid_width, const std::size_t grid_height);
   ~Renderer();
@@ -15,9 +15,9 @@ class Renderer {
   void Render(Snake const snake, SDL_Point const &food);
   void UpdateWindowTitle(int score, int fps);
 
- private:
+private:
   std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)> sdl_window;
-  SDL_Renderer *sdl_renderer;
+  std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)> sdl_renderer;
 
   const std::size_t screen_width;
   const std::size_t screen_height;
