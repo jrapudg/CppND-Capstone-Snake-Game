@@ -8,7 +8,9 @@ Renderer::Renderer(const std::size_t screen_width,
     : screen_width(screen_width),
       screen_height(screen_height),
       grid_width(grid_width),
-      grid_height(grid_height) {
+      grid_height(grid_height),
+      sdl_window(nullptr, SDL_DestroyWindow)
+       {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "SDL could not initialize.\n";
@@ -16,9 +18,9 @@ Renderer::Renderer(const std::size_t screen_width,
   }
 
   // Create Window
-  sdl_window = SDL_CreateWindow("Snake Game", SDL_WINDOWPOS_CENTERED,
+  sdl_window.reset(SDL_CreateWindow("Snake Game", SDL_WINDOWPOS_CENTERED,
                                 SDL_WINDOWPOS_CENTERED, screen_width,
-                                screen_height, SDL_WINDOW_SHOWN);
+                                screen_height, SDL_WINDOW_SHOWN));
 
   if (nullptr == sdl_window) {
     std::cerr << "Window could not be created.\n";
@@ -26,7 +28,7 @@ Renderer::Renderer(const std::size_t screen_width,
   }
 
   // Create renderer
-  sdl_renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_ACCELERATED);
+  sdl_renderer = SDL_CreateRenderer(sdl_window.get(), -1, SDL_RENDERER_ACCELERATED);
   if (nullptr == sdl_renderer) {
     std::cerr << "Renderer could not be created.\n";
     std::cerr << "SDL_Error: " << SDL_GetError() << "\n";
@@ -34,7 +36,7 @@ Renderer::Renderer(const std::size_t screen_width,
 }
 
 Renderer::~Renderer() {
-  SDL_DestroyWindow(sdl_window);
+  //SDL_DestroyWindow(sdl_window);
   SDL_Quit();
 }
 
@@ -77,5 +79,5 @@ void Renderer::Render(Snake const snake, SDL_Point const &food) {
 
 void Renderer::UpdateWindowTitle(int score, int fps) {
   std::string title{"Snake Score: " + std::to_string(score) + " FPS: " + std::to_string(fps)};
-  SDL_SetWindowTitle(sdl_window, title.c_str());
+  SDL_SetWindowTitle(sdl_window.get(), title.c_str());
 }
