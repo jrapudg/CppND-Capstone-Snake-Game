@@ -1,13 +1,15 @@
 #include "game.h"
-#include <iostream>
 #include "SDL.h"
+#include <iostream>
+#include <thread>
+#include <future>
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
-    : snake(grid_width, grid_height),
-      engine(dev()),
-      random_w(0, static_cast<int>(grid_width)-1),
-      random_h(0, static_cast<int>(grid_height)-1) {
+    : snake(grid_width, grid_height), engine(dev()),
+      random_w(0, static_cast<int>(grid_width) - 1),
+      random_h(0, static_cast<int>(grid_height) - 1) {
   PlaceFood();
+  //AddObstacle();
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -17,15 +19,17 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   Uint32 frame_end;
   Uint32 frame_duration;
   int frame_count = 0;
-  bool running = true;
-  
+
+
+  std::thread t1(&Game::ObstaclesThread, this);
+   
   while (running) {
-    
+
     frame_start = SDL_GetTicks();
     // Input, Update, Render - the main game loop.
     controller.HandleInput(running, snake);
     Update();
-    renderer.Render(snake, food);
+    renderer.Render(snake, food, obstacles);
 
     frame_end = SDL_GetTicks();
 
@@ -48,6 +52,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
       SDL_Delay(target_frame_duration - frame_duration);
     }
   }
+  t1.join();
 }
 
 void Game::PlaceFood() {
@@ -65,8 +70,54 @@ void Game::PlaceFood() {
   }
 }
 
+void Game::ObstaclesThread(){
+  int i = 0;
+  while(snake.alive){
+    if(i <= 50){
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      //std::cout << i << std::endl;
+      i++;
+    }
+    else{
+      Game::AddObstacle();
+      i = 0;
+    }
+  }
+}
+
+void Game::AddObstacle() {
+  SDL_Point obstacle;
+  int x, y;
+  while (true) {
+    x = random_w(engine);
+    y = random_h(engine);
+
+    if (!snake.SnakeCell(x, y)) {
+      obstacle.x = x;
+      obstacle.y = y;
+      std::vector<SDL_Point>::iterator it;
+
+      it = std::find_if(obstacles.begin(), obstacles.end(),
+                        [&obs = obstacle](const SDL_Point &i_obs) -> bool {
+                          return obs.x == i_obs.x && obs.y == i_obs.y;
+                        });
+
+      if (it == obstacles.end()) {
+        obstacles.emplace_back(obstacle);
+        return;
+      }
+    }
+  }
+}
+
 void Game::Update() {
-  if (!snake.alive) return;
+  for(auto &obstacle : obstacles){
+    if(static_cast<int>(snake.head_x) == obstacle.x && static_cast<int>(snake.head_y) == obstacle.y)
+      snake.alive = false;
+  }
+
+  if (!snake.alive)
+    return;
 
   snake.Update();
 
