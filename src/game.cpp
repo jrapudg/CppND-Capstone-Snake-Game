@@ -1,15 +1,15 @@
 #include "game.h"
 #include "SDL.h"
+#include <future>
 #include <iostream>
 #include <thread>
-#include <future>
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake(grid_width, grid_height), engine(dev()),
       random_w(0, static_cast<int>(grid_width) - 1),
       random_h(0, static_cast<int>(grid_height) - 1) {
   PlaceFood();
-  //AddObstacle();
+  // AddObstacle();
 }
 
 void Game::Run(Controller const &controller, Renderer &renderer,
@@ -20,9 +20,8 @@ void Game::Run(Controller const &controller, Renderer &renderer,
   Uint32 frame_duration;
   int frame_count = 0;
 
-
   std::thread t1(&Game::ObstaclesThread, this);
-   
+
   while (running) {
 
     frame_start = SDL_GetTicks();
@@ -70,15 +69,14 @@ void Game::PlaceFood() {
   }
 }
 
-void Game::ObstaclesThread(){
+void Game::ObstaclesThread() {
   int i = 0;
-  while(snake.alive){
-    if(i <= 50){
+  while (snake.alive) {
+    if (i <= 50) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      //std::cout << i << std::endl;
+      // std::cout << i << std::endl;
       i++;
-    }
-    else{
+    } else {
       Game::AddObstacle();
       i = 0;
     }
@@ -111,8 +109,9 @@ void Game::AddObstacle() {
 }
 
 void Game::Update() {
-  for(auto &obstacle : obstacles){
-    if(static_cast<int>(snake.head_x) == obstacle.x && static_cast<int>(snake.head_y) == obstacle.y)
+  for (auto &obstacle : obstacles) {
+    if (static_cast<int>(snake.head_x) == obstacle.x &&
+        static_cast<int>(snake.head_y) == obstacle.y)
       snake.alive = false;
   }
 
