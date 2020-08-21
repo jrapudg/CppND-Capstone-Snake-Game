@@ -101,6 +101,7 @@ void Game::AddObstacle() {
                         });
 
       if (it == obstacles.end()) {
+        std::lock_guard<std::mutex> lck(_mtx);
         obstacles.emplace_back(obstacle);
         return;
       }

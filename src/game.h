@@ -20,6 +20,7 @@ private:
   Snake snake;
   SDL_Point food;
   std::vector<SDL_Point> obstacles;
+  std::mutex _mtx;
 
   std::random_device dev;
   std::mt19937 engine;
