@@ -1,8 +1,8 @@
 #include "game.h"
 #include "SDL.h"
-#include <future>
 #include <iostream>
 #include <thread>
+#include <algorithm>
 
 Game::Game(std::size_t grid_width, std::size_t grid_height)
     : snake(grid_width, grid_height), engine(dev()),
