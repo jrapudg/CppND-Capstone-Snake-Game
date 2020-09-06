@@ -39,7 +39,7 @@ void Game::Run(Controller const &controller, Renderer &renderer,
 
     // After every second, update the window title.
     if (frame_end - title_timestamp >= 1000) {
-      renderer.UpdateWindowTitle(score, frame_count);
+      renderer.UpdateWindowTitle(score, hScore, frame_count);
       frame_count = 0;
       title_timestamp = frame_end;
     }
@@ -61,7 +61,13 @@ void Game::PlaceFood() {
     y = random_h(engine);
     // Check that the location is not occupied by a snake item before placing
     // food.
-    if (!snake.SnakeCell(x, y)) {
+    std::vector<SDL_Point>::iterator it;
+    std::lock_guard<std::mutex> lck(_mtx);
+    it = std::find_if(obstacles.begin(), obstacles.end(),
+                        [&x=x, &y=y](const SDL_Point &i_obs) -> bool {
+                          return x == i_obs.x && y == i_obs.y;
+                        });
+    if (!snake.SnakeCell(x, y) && (it == obstacles.end())) {
       food.x = x;
       food.y = y;
       return;
@@ -71,10 +77,10 @@ void Game::PlaceFood() {
 
 void Game::ObstaclesThread() {
   int i = 0;
-  while (snake.alive) {
-    if (i <= 50) {
+  while (snake.alive && running) {
+    // wait 8 seconds 
+    if (i <= 80) {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      // std::cout << i << std::endl;
       i++;
     } else {
       Game::AddObstacle();
@@ -94,14 +100,13 @@ void Game::AddObstacle() {
       obstacle.x = x;
       obstacle.y = y;
       std::vector<SDL_Point>::iterator it;
-
+      std::lock_guard<std::mutex> lck(_mtx);
       it = std::find_if(obstacles.begin(), obstacles.end(),
                         [&obs = obstacle](const SDL_Point &i_obs) -> bool {
                           return obs.x == i_obs.x && obs.y == i_obs.y;
                         });
 
       if (it == obstacles.end()) {
-        std::lock_guard<std::mutex> lck(_mtx);
         obstacles.emplace_back(obstacle);
         return;
       }

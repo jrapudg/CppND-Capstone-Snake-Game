@@ -15,6 +15,8 @@ public:
            std::size_t target_frame_duration);
   int GetScore() const;
   int GetSize() const;
+  void SetHighestScore(int score) { hScore = score; }
+  int GetHighestScore(){ return hScore; }
 
 private:
   Snake snake;
@@ -28,6 +30,7 @@ private:
   std::uniform_int_distribution<int> random_h;
 
   int score{0};
+  int hScore{0};
   bool running{true};
   void PlaceFood();
   void AddObstacle();
