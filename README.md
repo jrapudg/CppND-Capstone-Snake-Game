@@ -34,6 +34,10 @@ In this project, I extended this Snake game, following the principles I have lea
 * Unique pointer for render and window.
 * Mux for avoiding data races.
 
+![](snake_1.png)
+
+![](snake_2.png)
+
 ## Rubric Criteria accomplished
 * A README with instructions is included with the project.
 * The project demonstrates an understanding of C++ functions and control structures.
