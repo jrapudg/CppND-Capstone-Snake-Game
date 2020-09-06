@@ -7,6 +7,7 @@
 #include "snake.h"
 #include <random>
 #include <vector>
+#include <mutex>
 
 class Game {
 public:
